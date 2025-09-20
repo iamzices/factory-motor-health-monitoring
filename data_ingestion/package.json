@@ -1,0 +1,16 @@
+{
+  "name": "data_ingestion",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.9",
+    "express": "^5.1.0"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
