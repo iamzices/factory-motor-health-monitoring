@@ -14,10 +14,10 @@ export default class RabbitMQClient {
             this.connection = await amqplib.connect(this.url);
             this.channel = await this.connection.createChannel();
             await this.channel.assertExchange(this.exchange, "topic", { durable: true });
-            console.log("Connected to [RabbitMQ] and exchange declared");
+            console.log("[RabbitMQ] Connected and exchange declared");
         } catch (error) {
-            console.error("Error connecting to [RabbitMQ]: ", error);
-            process.exit(1)
+            console.error("[RabbitMQ] Error connecting:", error);
+            throw error;
         }
     }
 
@@ -35,15 +35,15 @@ export default class RabbitMQClient {
                     persistent: true
                 }
             );
-            console.log("Published [RabbitMQ] message (${routingKey})", message)
+            console.log(`[RabbitMQ] Published message to (${routingKey}):`, JSON.stringify(message))
         } catch (error) {
-            console.error("Error publishing message to [RabbitMQ]: ", error);
+            console.error("[RabbitMQ] Error publishing message:", error);
         }
     } 
 
     async close() {
         await this.channel?.close();
         await this.connection?.close();
-        console.log("Closed connection to [RabbitMQ]")
+        console.log("[RabbitMQ] Connection closed")
     }
 }
