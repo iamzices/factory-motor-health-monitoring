@@ -1,5 +1,6 @@
 import express from "express";
 import Joi from "joi";
+import { v4 as uuidv4 } from 'uuid';
 import RabbitMQClient from "./rabbitmq.js";
 import { RULES, validateData, checkThreshold } from "./rules.js";
 
@@ -7,9 +8,6 @@ import { RULES, validateData, checkThreshold } from "./rules.js";
 const PORT = 3000;
 const RABBITMQ_URL = "amqp://test:test@localhost:5672/";
 const ALERTS_EXCHANGE = "motor.alerts";
-
-// --- rabbitmq client ---
-const rabbitMqClient = new RabbitMQClient(RABBITMQ_URL, ALERTS_EXCHANGE);
 
 // --- request body ---
 const sensorSchema = Joi.object({
@@ -28,7 +26,6 @@ function buildAlert(body, alertType){
         timestamp: body.timestamp,
         sensor_type: rule.sensorType,
         value: body[fieldKey],
-        threshold: rule.thresholdMax, 
         alert_type: alertType,
     }
 }
@@ -41,15 +38,20 @@ function sendResponse(res, { status = 200, accepted = true, errors = [], trigger
 const app = express();
 app.use(express.json());
 
+// --- rabbitmq client ---
+const rabbitMqClient = new RabbitMQClient(RABBITMQ_URL, ALERTS_EXCHANGE);
+
 // --- routes ---
 app.post("/api/sensor", (req, res) => {
+    const id = uuidv4();
+    
     try {
-        console.log(`[API] Received sensor data body=${JSON.stringify(req.body)}`);
+        console.log(`[API] (id=${id}) Received sensor data body=${JSON.stringify(req.body)}`);
 
         // 1. check request schema 
         const schemaValidationResult = sensorSchema.validate(req.body);
         if (schemaValidationResult.error) {
-            console.warn(`[API] Schema validation failed body=${JSON.stringify(req.body)}`);
+            console.warn(`[API] Schema validation failed (id=${id})`);
             return sendResponse(res, {
                 status: 400,
                 accepted: false,
@@ -60,7 +62,7 @@ app.post("/api/sensor", (req, res) => {
         // 2. validate bounds
         const errors = validateData(req.body);
         if (errors.length > 0) {
-            console.warn(`[API] Domain validation failed errors=${errors.join(",")} body=${JSON.stringify(req.body)}`);
+            console.warn(`[API] Domain validation failed errors=${errors.join(",")} (id=${id})`);
             return sendResponse(res, {
                 status: 422,
                 accepted: false,
@@ -71,10 +73,10 @@ app.post("/api/sensor", (req, res) => {
         // 3. check threshold for alerts
         const triggers = checkThreshold(req.body);
         if (triggers.length > 0) {
-            console.log(`[Alerts] Triggered=${triggers.join(",")} body=${JSON.stringify(req.body)}`);
+            console.log(`[Alerts] Triggered=${triggers.join(",")} (id=${id})`);
             for (const type of triggers) {
                 const alert = buildAlert(req.body, type);
-                rabbitMqClient.publish(`alert.${alert.sensor_type}`, alert);
+                rabbitMqClient.publish(`alert.${alert.sensor_type}`, alert, id);
             }
         }
 
@@ -82,7 +84,7 @@ app.post("/api/sensor", (req, res) => {
         return sendResponse(res, { status: 201, triggers });
 
     } catch (error) {
-        console.error("Error processing [API] request:", error);
+        console.error(`[API] Error processing request (id=${id}):`, error);
         return sendResponse(res, {
             status: 500,
             accepted: false,
@@ -95,17 +97,9 @@ app.post("/api/sensor", (req, res) => {
 (async () => {
     try {
         await rabbitMqClient.connect();
-        const server = app.listen(PORT, () => {
+        app.listen(PORT, () => {
             console.log(`[Server] Running on port ${PORT}`);
         });
-
-        const shutdown = async (sig) => {
-            console.log(`[Server] Shutting down...`);
-            try { await rabbitMqClient.close(); } 
-            finally { server.close(() => process.exit(0)); }
-        };
-
-        ["SIGINT", "SIGTERM"].forEach(sig => process.once(sig, () => void shutdown(sig)));
     } catch (error) {
         console.error("[Server] Startup failed:", error, "exiting...");
         process.exit(1);

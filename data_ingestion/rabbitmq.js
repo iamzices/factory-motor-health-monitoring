@@ -21,7 +21,7 @@ export default class RabbitMQClient {
         }
     }
 
-    publish(routingKey, message) {
+    publish(routingKey, message, id) {
         try {
             if (!this.channel) {
                 throw new Error("Channel not initialized")
@@ -35,15 +35,9 @@ export default class RabbitMQClient {
                     persistent: true
                 }
             );
-            console.log(`[RabbitMQ] Published message to (${routingKey}):`, JSON.stringify(message))
+            console.log(`[RabbitMQ] Published message to ${routingKey} (id=${id}):`, JSON.stringify(message))
         } catch (error) {
-            console.error("[RabbitMQ] Error publishing message:", error);
+            console.error(`[RabbitMQ] Error publishing message (id=${id}):`, error);
         }
     } 
-
-    async close() {
-        await this.channel?.close();
-        await this.connection?.close();
-        console.log("[RabbitMQ] Connection closed")
-    }
 }
