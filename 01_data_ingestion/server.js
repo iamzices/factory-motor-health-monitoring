@@ -27,8 +27,8 @@ function buildAlert(body, fieldKey){
   }
 }
 
-function sendResponse(res, { status = 200, accepted = true, errors = [], triggers = [] }) {
-  return res.status(status).json({ accepted, errors, triggers })
+function sendResponse(res, { status = 200 }) {
+  return res.status(status).end();
 }
 
 // --- api setup ---
@@ -50,8 +50,6 @@ app.post("/api/sensor", async (req, res) => {
       console.warn(`[API] Schema validation failed (id=${id})`);
       return sendResponse(res, {
         status: 400,
-        accepted: false,
-        errors: ["Invalid request body"],
       });
     }
 
@@ -72,14 +70,12 @@ app.post("/api/sensor", async (req, res) => {
     }
 
     // 3. return valid response 
-    return sendResponse(res, { status: 201, triggers });
+    return sendResponse(res, { status: 201 });
 
   } catch (error) {
     console.error(`[API] Error processing request (id=${id}):`, error);
     return sendResponse(res, {
-      status: 500,
-      accepted: false,
-      errors: ["Internal server error"],
+      status: 500
     })
   }
 });
