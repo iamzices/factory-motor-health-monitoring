@@ -14,7 +14,7 @@ setup:
 	
 	docker run -d --name pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres postgres:15; \
 	until docker exec pg pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done; \
-	docker exec -i pg psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f - < 03-sql_queries/create_table.sql
+	docker exec -i pg psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f - < 03_sql_queries/create_table.sql
 
 setup1:
 	@cd 01_data_ingestion && npm install
