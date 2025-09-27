@@ -1,20 +1,16 @@
-import json
 import logging
+import os
 from database import Alert, PostgresClient
 from rabbitmq import RabbitMQClient
 
 
 # --- configs ---
-CONFIG_PATH = "config.json"
-with open(CONFIG_PATH, "r", encoding="utf-8") as file:
-    config = json.load(file)
-
-RABBITMQ_URL = config["rabbitmq_url"]
-ALERTS_QUEUE = config["alerts_queue"]
-NOTIFICATIONS_EXCHANGE = config["notifications_exchange"]
-NOTIFICATIONS_ROUTING = config["notifications_routing"]
-POSTGRES_URL = config["postgres_url"]
-ALERTS_TABLE = config["alerts_table"]
+RABBITMQ_URL = os.environ.get("RABBITMQ_URL", "amqp://rabbitmq:rabbitmq@localhost:5672/")
+POSTGRES_URL = os.environ.get("POSTGRES_URL", "postgresql://postgres:postgres@localhost:5432/postgres")
+ALERTS_QUEUE = "alerts"
+NOTIFICATIONS_EXCHANGE = "motor.notifications"
+NOTIFICATIONS_ROUTING = "alertCreated."
+ALERTS_TABLE = "motor_alerts"
 
 # --- logger ---
 logging.basicConfig(level=logging.INFO)

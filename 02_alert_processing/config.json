@@ -1,8 +1,0 @@
-{
-    "rabbitmq_url": "amqp://rabbitmq:rabbitmq@localhost:5672/",
-    "alerts_queue": "alerts",
-    "notifications_exchange": "motor.notifications",
-    "notifications_routing": "alertCreated.",
-    "postgres_url": "postgresql://postgres:postgres@localhost:5432/postgres",
-    "alerts_table": "motor_alerts"
-}

@@ -1,15 +1,12 @@
-import json
+import os
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, text
 
 
-CONFIG_PATH = "config.json"
-with open(CONFIG_PATH, "r", encoding="utf-8") as file:
-    config = json.load(file)
-POSTGRES_URL = config["postgres_url"]
-ALERTS_TABLE = config["alerts_table"]
+POSTGRES_URL = os.environ.get("POSTGRES_URL", "postgresql://postgres:postgres@localhost:5432/postgres")
+ALERTS_TABLE = "motor_alerts"
 
 engine = create_engine(POSTGRES_URL)
 app = FastAPI()

@@ -6,7 +6,7 @@ import { RULES, checkThreshold } from "./rules.js";
 
 // --- configs ---
 const PORT = 3000;
-const RABBITMQ_URL = "amqp://rabbitmq:rabbitmq@localhost:5672/";
+const RABBITMQ_URL = process.env.RABBITMQ_URL ?? "amqp://rabbitmq:rabbitmq@localhost:5672/";
 const ALERTS_EXCHANGE = "motor.alerts";
 
 // --- request body ---
