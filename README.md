@@ -1,28 +1,48 @@
-# Factory Motor Health Monitoring 
+# Factory Motor Health Monitoring
 
-A tiny end-to-end pipeline that ingests sensor readings, raises alerts via RabbitMQ, persists them in Postgres, and exposes an analytics API + HTML dashboard. Architecture: **Node ingestion → RabbitMQ → Python alert processor → Postgres → FastAPI (+ static dashboard)**.
+A tiny pipeline for factory motor monitoring with RabbitMQ.
 
-## Quick start
+![System Architecture](assets/architecture.png)
 
+## Services
 ```bash
-# 1) RabbitMQ + PostgreSQL DB setup (Uses Docker)
-make setup
-
-# 2) Install dependencies
-make setup1     # Node.js 
-make setup2     # Python 
-make setup4     # FastAPI
-
-# 3) Run services
-make 1          # Node ingestion API on http://localhost:3000
-make 2          # Python alert processor (RabbitMQ -> Postgres)
-make app4       # Analytics API on http://localhost:8000
+# Start RabbitMQ + PostgreSQL with Docker
+make setup 
 ```
 
-View the dashboard at `04_frontend_prototype/index.html`
+`01_data_ingestion/`
+```bash
+# Install dependencies
+make setup1
 
-### Send sample data to Node.js service
+# Run API (http://localhost:3000)
+make 1
+```
+
+`02_alert_processing/`
+```bash
+# Install dependencies
+make setup2
+
+# Run processor
+make 2
+```
+
+`04_frontend_prototype/`
 
 ```bash
+# Install dependencies
+make setup4
+
+# Run API (http://localhost:8000)
+make app4
+
+# View the dashboard at
+# 04_frontend_prototype/index.html
+```
+
+`tests/`
+```bash
+# Send sample data
 pytest
 ```
