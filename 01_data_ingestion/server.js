@@ -13,8 +13,8 @@ const ALERTS_EXCHANGE = "motor.alerts";
 const sensorSchema = Joi.object({
   motor_id: Joi.string().required(),
   timestamp: Joi.string().isoDate().required(),
-  temperature_c: Joi.number().required().greater(RULES.temperature_c.validateMin),
-  vibration_g: Joi.number().required().greater(RULES.vibration_g.validateMin),
+  temperature_c: Joi.number().required().min(RULES.temperature_c.validateMin),
+  vibration_g: Joi.number().required().min(RULES.vibration_g.validateMin),
 }).required().unknown(false);
 
 // --- helpers ---
@@ -45,21 +45,19 @@ app.post("/api/sensor", async (req, res) => {
     console.log(`[API] (id=${id}) Received sensor data body=${JSON.stringify(req.body)}`);
 
     // 1. check request schema
-    const schemaValidationResult = sensorSchema.validate(req.body);
-    if (schemaValidationResult.error) {
-      console.warn(`[API] Schema validation failed (id=${id})`);
-      return sendResponse(res, {
-        status: 400,
-      });
+    const { error: validationError, value: data } = sensorSchema.validate(req.body);
+    if (validationError) {
+      console.warn(`[API] Schema validation failed (id=${id}): ${validationError.message}`);
+      return res.status(400).json({ error: validationError.message });
     }
 
     // 2. check threshold for alerts
-    const triggers = checkThreshold(req.body);
+    const triggers = checkThreshold(data);
     if (triggers.length > 0) {
       console.log(`[Alerts] Triggered=${triggers.join(",")} (id=${id})`);
       let publishErrors = false;
       for (const fieldKey of triggers) {
-        const alert = buildAlert(req.body, fieldKey);
+        const alert = buildAlert(data, fieldKey);
         const published = rabbitMqClient.publish(`alert.${fieldKey}`, alert, id);
         if (!published) publishErrors = true;
       }
@@ -80,6 +78,12 @@ app.post("/api/sensor", async (req, res) => {
       status: 500
     });
   }
+});
+
+// --- error handler ---
+app.use((err, req, res, next) => {
+  console.warn(`[API] Rejected request: ${err.message}`);
+  res.status(err.status ?? 500).json({ error: err.expose ? err.message : "Internal server error" });
 });
 
 // --- start server ---
