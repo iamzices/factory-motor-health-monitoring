@@ -40,8 +40,8 @@ export default class RabbitMQClient {
       );
       console.log(`[RabbitMQ] Published to ${routingKey} (id=${id}): ${JSON.stringify(message)}`);
       return true;
-    } catch (err) {
-      console.error(`[RabbitMQ] Error publishing (id=${id}):`, err);
+    } catch (error) {
+      console.error(`[RabbitMQ] Error publishing (id=${id}):`, error);
       return false;
     }
   }

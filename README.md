@@ -24,5 +24,5 @@ View the dashboard at `04_frontend_prototype/index.html`
 ### Send sample data to Node.js service
 
 ```bash
-python pytest
+pytest
 ```

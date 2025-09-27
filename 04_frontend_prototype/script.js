@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setInterval(initializeDashboard, 60000); // refresh every minute
     });
 
-    // initialize the dashboard
+    // fetch/update table and chart
     async function initializeDashboard() {
         try {
             const [alerts, dailyCounts] = await Promise.all([

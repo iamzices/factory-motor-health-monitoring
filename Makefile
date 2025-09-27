@@ -17,19 +17,19 @@ setup:
 	docker exec -i pg psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f - < 03_sql_queries/create_table.sql
 
 setup1:
-	@cd 01_data_ingestion && npm install
+	@cd 01_data_ingestion && npm install 
 
 setup2:
-	@python -m pip install --upgrade pip && python -m pip install kombu pydantic sqlalchemy psycopg2-binary
+	@python -m pip install kombu pydantic sqlalchemy psycopg2-binary
 
 setup4:
-	@python -m pip install --upgrade pip && python -m pip install fastapi uvicorn sqlalchemy psycopg2-binary asyncpg
+	@python -m pip install fastapi uvicorn sqlalchemy psycopg2-binary asyncpg
 
 1:
-	@cd 01_data_ingestion && node server.js
+	@cd 01_data_ingestion && node server.js 
 
 2:
-	@cd 02_alert_processing && py alert_processor.py
+	@cd 02_alert_processing && python alert_processor.py 
 
 app4: 
-	@cd 04_frontend_prototype && python application.py
+	@cd 04_frontend_prototype && python app.py 

@@ -40,7 +40,7 @@ const rabbitMqClient = new RabbitMQClient(RABBITMQ_URL, ALERTS_EXCHANGE);
 
 // --- routes ---
 app.post("/api/sensor", async (req, res) => {
-  const id = uuidv4();
+  const id = uuidv4(); // generate unique ID for tracking in logs
   try {
     console.log(`[API] (id=${id}) Received sensor data body=${JSON.stringify(req.body)}`);
 
