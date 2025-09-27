@@ -45,6 +45,7 @@ export default class RabbitMQClient {
       return false;
     }
   }
+
   /**
    * Closes RabbitMQ connection and channel
    */

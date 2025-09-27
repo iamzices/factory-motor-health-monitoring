@@ -8,7 +8,7 @@ export const RULES = {
     validateMin: -50,
     thresholdMax: 80,
   },
-}
+};
 
 // --- rule helpers ---
 /**

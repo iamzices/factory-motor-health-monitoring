@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const API_BASE_URL = 'http://localhost:8000';
-    
+
     google.charts.load('current', {'packages':['table', 'corechart']});
     google.charts.setOnLoadCallback(() => {
         initializeDashboard();
@@ -32,12 +32,12 @@ document.addEventListener('DOMContentLoaded', function () {
         data.addColumn('string', 'Motor ID');
         data.addColumn('string', 'Sensor');
         data.addColumn('number', 'Value');
-        
+
         alerts.forEach(alert => {
             data.addRow([
                 new Date(alert.timestamp).toLocaleString(),
-                String(alert.motor_id), 
-                String(alert.sensor_type), 
+                String(alert.motor_id),
+                String(alert.sensor_type),
                 Number(alert.value)
             ]);
         });
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const data = new google.visualization.DataTable();
         data.addColumn('string', 'Date');
         data.addColumn('number', 'Count');
-        
+
         dailyCounts.forEach(item => {
             data.addRow([item.date, item.count]);
         });
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const chart = new google.visualization.ColumnChart(document.getElementById('chart-container'));
         chart.draw(data, options);
     }
-    
+
     function updateLastUpdated() {
         const now = new Date();
         document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleTimeString()}`;

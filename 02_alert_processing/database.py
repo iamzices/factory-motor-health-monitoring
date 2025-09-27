@@ -20,7 +20,7 @@ class PostgresClient:
 
     def insert_alert(self, alert: Alert):
         sql = text(f"""
-                   INSERT INTO {self.table_name} 
+                   INSERT INTO {self.table_name}
                    (motor_id, sensor_type, timestamp, value)
                    VALUES
                    (:motor_id, :sensor_type, :timestamp, :value)

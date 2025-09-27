@@ -29,7 +29,7 @@ def main():
         alert = Alert.model_validate(body)
         postgres_client.insert_alert(alert)
         rabbit_mq_client.publish(alert)
-        
+
     rabbit_mq_client.consume(handler=handle)
 
 
