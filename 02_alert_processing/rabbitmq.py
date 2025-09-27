@@ -1,7 +1,9 @@
 import json
 import logging
+import time
 import uuid
 from kombu import Connection, Consumer, Exchange, Producer, Queue
+from pydantic import ValidationError
 
 
 class RabbitMQClient:
@@ -57,6 +59,10 @@ class RabbitMQClient:
             self.handler(body)
             message.ack()
             self.logger.info(f"[RabbitMQ] Processed message (id={id})")
-        except Exception as e:
-            self.logger.error(f"[RabbitMQ] Error processing message (id={id}): {e}")
+        except ValidationError as e:
+            self.logger.error(f"[RabbitMQ] Invalid message, rejecting (id={id}): {e}")
             message.reject()
+        except Exception as e:
+            self.logger.error(f"[RabbitMQ] Error processing message, requeueing (id={id}): {e}")
+            time.sleep(1)  # throttle redelivery while a dependency is down
+            message.requeue()
