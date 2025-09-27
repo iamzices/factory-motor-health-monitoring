@@ -1,6 +1,7 @@
 {
   "name": "data_ingestion",
   "version": "1.0.0",
+  "private": true,
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -11,8 +12,5 @@
     "express": "^5.1.0",
     "joi": "^18.0.1",
     "uuid": "^13.0.0"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  }
 }
