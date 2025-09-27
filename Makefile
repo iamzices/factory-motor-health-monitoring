@@ -19,10 +19,10 @@ setup1:
 	@cd 01_data_ingestion && npm install
 
 setup2:
-	@python -m pip install kombu pydantic sqlalchemy psycopg2-binary
+	@python -m pip install -r requirements.txt
 
 setup4:
-	@python -m pip install fastapi uvicorn sqlalchemy psycopg2-binary asyncpg
+	@python -m pip install -r requirements.txt
 
 1:
 	@cd 01_data_ingestion && node server.js
