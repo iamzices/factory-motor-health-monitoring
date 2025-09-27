@@ -13,9 +13,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET"],
 )
 
 
@@ -26,6 +24,7 @@ def get_active_alerts():
         FROM {ALERTS_TABLE}
         WHERE alert_type = 'ACTIVE'
         ORDER BY timestamp DESC
+        LIMIT 100
     """)
     with engine.connect() as conn:
         result = conn.execute(sql)
