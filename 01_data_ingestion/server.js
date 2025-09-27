@@ -65,7 +65,9 @@ app.post("/api/sensor", async (req, res) => {
       }
       if (publishErrors) {
         console.error(`[API] Failed to publish one or more alerts (id=${id})`);
-        throw new Error();
+        return sendResponse(res, {
+          status: 500
+        })
       }
     }
 
