@@ -1,10 +1,11 @@
 import json
+from pathlib import Path
 import requests
 
 def test_send_data():
     URL = "http://localhost:3000/api/sensor"
     expected_statuses = [201]*8 + [400, 400]
-    with open("tests/sensor_data.jsonl") as file:
+    with open(Path(__file__).parent / "sensor_data.jsonl") as file:
         for idx, line in enumerate(file):
             if not line.strip():
                 continue
