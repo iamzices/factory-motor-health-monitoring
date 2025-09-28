@@ -1,6 +1,6 @@
+import { randomUUID } from "node:crypto";
 import express from "express";
 import Joi from "joi";
-import { v4 as uuidv4 } from "uuid";
 import RabbitMQClient from "./rabbitmq.js";
 import { RULES, checkThreshold } from "./rules.js";
 
@@ -15,7 +15,7 @@ const sensorSchema = Joi.object({
   timestamp: Joi.string().isoDate().required(),
   temperature_c: Joi.number().required().min(RULES.temperature_c.validateMin),
   vibration_g: Joi.number().required().min(RULES.vibration_g.validateMin),
-}).required().unknown(false);
+}).required();
 
 // --- helpers ---
 function buildAlert(body, fieldKey) {
@@ -27,10 +27,6 @@ function buildAlert(body, fieldKey) {
   };
 }
 
-function sendResponse(res, { status = 200 }) {
-  return res.status(status).end();
-}
-
 // --- api setup ---
 const app = express();
 app.use(express.json());
@@ -40,7 +36,7 @@ const rabbitMqClient = new RabbitMQClient(RABBITMQ_URL, ALERTS_EXCHANGE);
 
 // --- routes ---
 app.post("/api/sensor", async (req, res) => {
-  const id = uuidv4(); // generate unique ID for tracking in logs
+  const id = randomUUID(); // generate unique ID for tracking in logs
   try {
     console.log(`[API] (id=${id}) Received sensor data body=${JSON.stringify(req.body)}`);
 
@@ -63,20 +59,16 @@ app.post("/api/sensor", async (req, res) => {
       }
       if (publishErrors) {
         console.error(`[API] Failed to publish one or more alerts (id=${id})`);
-        return sendResponse(res, {
-          status: 500
-        });
+        return res.status(500).end();
       }
     }
 
     // 3. return valid response
-    return sendResponse(res, { status: 201 });
+    return res.status(201).end();
 
   } catch (error) {
     console.error(`[API] Error processing request (id=${id}):`, error);
-    return sendResponse(res, {
-      status: 500
-    });
+    return res.status(500).end();
   }
 });
 
@@ -101,13 +93,13 @@ app.use((err, req, res, next) => {
 
   // Graceful shutdown handler
   const shutdown = async (signal) => {
-    console.log("[Server] Shutting down...");
+    console.log(`[Server] ${signal} received, shutting down...`);
     server.close();
     await rabbitMqClient.close();
     process.exit(0);
   };
 
   // Register shutdown signals
-  process.on("SIGINT", () => shutdown("SIGINT"));
-  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 })();

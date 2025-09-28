@@ -29,4 +29,4 @@ class PostgresClient:
             with self.engine.begin() as conn:
                 conn.execute(sql, alert.model_dump())
         except Exception as e:
-            raise RuntimeError(f"Database error while inserting alert: {e}")
+            raise RuntimeError(f"Database error while inserting alert: {e}") from e

@@ -26,8 +26,6 @@ class RabbitMQClient:
         self.logger = logger
 
     def publish(self, alert):
-        if not self.producer:
-            raise RuntimeError("[RabbitMQ] Client not connected")
         routing_key = f"{self.notifications_routing}{alert.sensor_type}"
         self.producer.publish(
             alert.model_dump(),
@@ -38,8 +36,6 @@ class RabbitMQClient:
         )
 
     def consume(self, handler):
-        if not self.conn:
-            raise RuntimeError("[RabbitMQ] Client not connected")
         self.handler = handler
         with Consumer(
             self.conn,
@@ -53,16 +49,16 @@ class RabbitMQClient:
 
     def _on_message(self, body, message):
         """internal callback used by Consumer to process incoming messages"""
-        id = str(uuid.uuid4())  # generate unique ID for tracking in logs
+        log_id = str(uuid.uuid4())  # generate unique ID for tracking in logs
         try:
-            self.logger.info(f"[RabbitMQ] Received message (id={id}): {json.dumps(body)}")
+            self.logger.info(f"[RabbitMQ] Received message (id={log_id}): {json.dumps(body)}")
             self.handler(body)
             message.ack()
-            self.logger.info(f"[RabbitMQ] Processed message (id={id})")
+            self.logger.info(f"[RabbitMQ] Processed message (id={log_id})")
         except ValidationError as e:
-            self.logger.error(f"[RabbitMQ] Invalid message, rejecting (id={id}): {e}")
+            self.logger.error(f"[RabbitMQ] Invalid message, rejecting (id={log_id}): {e}")
             message.reject()
         except Exception as e:
-            self.logger.error(f"[RabbitMQ] Error processing message, requeueing (id={id}): {e}")
+            self.logger.error(f"[RabbitMQ] Error processing message, requeueing (id={log_id}): {e}")
             time.sleep(1)  # throttle redelivery while a dependency is down
             message.requeue()
